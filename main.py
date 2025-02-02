@@ -1,5 +1,4 @@
 import pygame
-import pygame as pg
 import random
 import sys
 import sqlite3 as sl
@@ -68,6 +67,7 @@ class Cubes(QWidget):
             self.play.show()
             self.games.show()
             self.slovo.show()
+    # Метод выбора сложности
     def lvls(self):
         self.slovo.setText('Выберите уровень сложности:')
         self.play.hide()
@@ -75,6 +75,7 @@ class Cubes(QWidget):
         for el in self.lvl_tipes:
             el.show()
 
+    # Метод выбора типа управления
     def tipes_move(self):
         self.tipe_lvl = self.sender().text()
         self.slovo.setText('Выберите тип управления:')
@@ -133,9 +134,6 @@ class Cubes(QWidget):
             self.sc = pygame.display.set_mode(SIZE)
             # Основные переменные
             self.new_start()
-            b = 0
-            a = 800
-
             # Пока не нажали крестик
             while not self.exit:
                 for event in pygame.event.get():
@@ -145,23 +143,17 @@ class Cubes(QWidget):
                 if self.game_over:
                     if pygame.key.get_pressed()[pygame.K_BACKSPACE]:
                         self.new_start()
-                    # Один раз рисуем
+                    # Один раз рисуем проигрыш и пояснение
                     if self.restart == 2:
-                        # a = 800
-                        # while a != 0:
-                        #     a -= 1
-                        #     pygame.draw.rect(self.sc, 'red', (0, 0, a, a))
-                        # while a != 800:
-                        #     a += 1
-                        #     pygame.draw.rect(self.sc, 'red', (0, 0, a, a))
                         font = pygame.font.SysFont('0', 60)
                         text = font.render(f'Игра окончена! Ваш счет: {int(self.score)}', True, 'white')
                         self.sc.blit(text, (400 - text.get_width() // 2, 400))
                         font = pygame.font.SysFont('0', 40)
                         text = font.render(f'Чтобы перезапустить нажмите - Backspace', True, 'white')
                         self.sc.blit(text, (400 - text.get_width() // 2, 500))
-                        self.restart = -1
+                        self.restart = -2
                         self.addbd()
+                    # Один раз рисуем паузу и пояснение
                     elif self.restart == 0:
                         font = pygame.font.SysFont('0', 200)
                         text = font.render(f'Пауза', True, 'white')
@@ -173,8 +165,9 @@ class Cubes(QWidget):
                         self.sc.blit(text, (400 - text.get_width() // 2, 600))
                         self.restart = -1
                         self.addbd()
-                    self.pause()
-
+                    # Вызов метода всегда кроме проигрыша
+                    if self.restart != -2:
+                        self.pause()
                 # Иначе (если игра не оконченна)
                 else:
                     self.pause()
@@ -182,13 +175,12 @@ class Cubes(QWidget):
                     self.sc.fill((self.hard, 0, 0))
                     self.dead = 0
                     # Повторяется один раз когда все кубики вышли за границы окна
-                    # Усложнения игры
                     if self.restart == 1:
                         self.new()
-                    # Бонус - щит
+                    # Отрисовка щита (Эфект)
                     if self.protect == 1:
                         pygame.draw.rect(self.sc, (0, 255, 255), (self.x_pospl, self.y_pospl, 20, 20))
-                    # Кубик игрока
+                    # Отрисовка кубика игрока
                     pygame.draw.rect(self.sc, 'white', (self.x_pospl, self.y_pospl, 20, 20), 2)
                     self.move_cubes_red()
                     self.move_cubes_green()
@@ -212,24 +204,20 @@ class Cubes(QWidget):
                 self.clock.tick(self.FPS)
                 # Обновление экрана
                 pygame.display.flip()
-                # self.animation()
-                # a -= 1
-                # b += 0.5
-                # update_rect = pg.Rect(b, b, a, a)
-                # pg.display.update(update_rect)
             # Выход
             pygame.quit()
-            self.slovo.setText('Перезапуск ;)')
+            self.slovo.setText('И снова привет! ;)')
             self.play.show()
             self.games.show()
             # Вызов метода записи данных в базу данных
             self.addbd()
-            protect = 1
 
+    # Метод движения игрока
     def move(self):
+        # Тип управления буквами
         if self.tipe_move == 1:
             if pygame.key.get_pressed()[pygame.K_w]:
-                # Если мы идем по диагонали скорость будет неполной так как она еще будет дополняться
+                # Если мы идем по диагонали скорость будет неполной так как она еще будет дополняться -
                 # другой стрелкой управления
                 if not pygame.key.get_pressed()[pygame.K_d] and not pygame.key.get_pressed()[pygame.K_a]:
                     if self.y_pospl - self.speed / 2 >= 0:
@@ -254,9 +242,10 @@ class Cubes(QWidget):
                         self.x_pospl += self.speed / 2
                 if self.x_pospl + self.speed / 2 <= 780:
                     self.x_pospl += self.speed / 2
+        # Тип управления стрелками
         else:
             if pygame.key.get_pressed()[pygame.K_UP]:
-                # Если мы идем по диагонали скорость будет неполной так как она еще будет дополняться
+                # Если мы идем по диагонали скорость будет неполной так как она еще будет дополняться -
                 # другой стрелкой управления
                 if not pygame.key.get_pressed()[pygame.K_RIGHT] and not pygame.key.get_pressed()[pygame.K_LEFT]:
                     if self.y_pospl - self.speed / 2 >= 0:
@@ -281,6 +270,8 @@ class Cubes(QWidget):
                         self.x_pospl += self.speed / 2
                 if self.x_pospl + self.speed / 2 <= 780:
                     self.x_pospl += self.speed / 2
+
+    # Метод паузы
     def pause(self):
         if pygame.key.get_pressed()[pygame.K_ESCAPE] and not self.game_over:
             self.game_over = True
@@ -288,7 +279,9 @@ class Cubes(QWidget):
             self.game_over = False
             self.restart = 0
 
+    # Метод обновления кубиков
     def new(self):
+        # Повторяется один раз когда все кубики вышли за границы окна
         if self.lvl <= 50:
             if self.hard + 4 <= 200:
                 self.hard += 4
@@ -297,7 +290,7 @@ class Cubes(QWidget):
                 self.hard += 2.25
         if self.lvl % 51 == 0:
             self.score += 50000
-            # Обновление списков координат и не только
+        # Обновление списков координат и не только
         self.x_posleftred = []
         self.y_posleftred = []
         self.x_posupred = []
@@ -338,6 +331,7 @@ class Cubes(QWidget):
         # Чтобы не повторялось
         self.restart = 0
 
+    # Метод движения и проверки столкновения красных кубиков
     def move_cubes_red(self):
         for i in range(int(self.tipe_lvl[:2]) // 4):
             # Передвижение красных кубиков по окну
@@ -406,6 +400,7 @@ class Cubes(QWidget):
                     self.x_posdownred[i] = 820
                     self.y_posdownred[i] = 820
 
+    # Метод движения и проверки столкновения зеленых кубиков
     def move_cubes_green(self):
         for i in range(self.col_green):
             # Определения направления движения и передвижение зеленых кубиков по окну
@@ -433,6 +428,7 @@ class Cubes(QWidget):
                 # Прибавление очков
                 self.score += 100
 
+    # Метод бонусов
     def bonusdef(self):
         pygame.draw.rect(self.sc, 'blue', (self.bonus_cords[0], self.bonus_cords[1], 20, 20))
         # Проверка коснулся ли игрок кубика бонуса (синего)
@@ -466,6 +462,7 @@ class Cubes(QWidget):
                 if self.v_green - 20 >= 10:
                     self.v_green -= 20
 
+    # Метод проверки ушли ли все красные кубики за границу
     def new_cubes(self):
         # Проверка все ли кубики за картой
         for i in range(int(self.tipe_lvl[:2]) // 4):
@@ -485,11 +482,12 @@ class Cubes(QWidget):
             self.v_red += 5
             self.v_green += 5
             self.lvl += 1
+
+    # Метод рестарта всей игры
     def new_start(self):
         self.exit = False
         self.game_over = False
         self.col_green = 0
-        green_nap = []
         self.x_pospl = 400
         self.y_pospl = 400
         self.score = 0
@@ -506,18 +504,7 @@ class Cubes(QWidget):
         self.clock = pygame.time.Clock()
         self.restart = 1
 
-    def animation(self):
-        a = 800
-        while a != 0:
-            a -= 1
-            update_rect = pg.Rect(400, 400, a, a)
-            pg.display.update(update_rect)
-        while a != 800:
-            a += 1
-            update_rect = pg.Rect(400, 400, a, a)
-            pg.display.update(update_rect)
-        # self.clock.tick(self.FPS)
-
+# Понятный вывод ошибок
 def except_hook(cls, exception, traceback):
     sys.__excepthook__(cls, exception, traceback)
 
