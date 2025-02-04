@@ -142,6 +142,8 @@ class Cubes(QWidget):
                 # Если игра оконченна
                 if self.game_over:
                     if pygame.key.get_pressed()[pygame.K_BACKSPACE]:
+                        if self.restart != -2:
+                            self.addbd()
                         self.new_start()
                     # Один раз рисуем проигрыш и пояснение
                     if self.restart == 2:
@@ -164,7 +166,6 @@ class Cubes(QWidget):
                         text = font.render(f'Чтобы перезапустить нажмите - Backspace', True, 'white')
                         self.sc.blit(text, (400 - text.get_width() // 2, 600))
                         self.restart = -1
-                        self.addbd()
                     # Вызов метода всегда кроме проигрыша
                     if self.restart != -2:
                         self.pause()
@@ -210,7 +211,8 @@ class Cubes(QWidget):
             self.play.show()
             self.games.show()
             # Вызов метода записи данных в базу данных
-            self.addbd()
+            if self.restart != -2:
+                self.addbd()
 
     # Метод движения игрока
     def move(self):
