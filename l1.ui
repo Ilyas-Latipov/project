@@ -45,6 +45,71 @@
     <string>Недавние игры</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="shop">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>300</y>
+     <width>161</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Магазин</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="s_protect">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>60</y>
+     <width>261</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>+щит - 1000 очков</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="s_speed">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>140</y>
+     <width>261</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>+ваша скорость - 900 очков</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="s_v_red">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>220</y>
+     <width>261</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>-скорость врагов - 900 очков</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="s_v_green">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>300</y>
+     <width>261</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>-скорость зеленых - 500 очков</string>
+   </property>
+  </widget>
   <widget class="QListWidget" name="form">
    <property name="geometry">
     <rect>
@@ -144,6 +209,19 @@
    </property>
    <property name="text">
     <string>Добро пожаловать! :)</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="balance">
+   <property name="geometry">
+    <rect>
+     <x>84</x>
+     <y>380</y>
+     <width>241</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Баланс: </string>
    </property>
   </widget>
   <widget class="QPushButton" name="tipe1">

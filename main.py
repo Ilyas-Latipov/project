@@ -15,11 +15,21 @@ class Cubes(QWidget):
 
     def initUI(self):
         # Прячем обьекты
+        self.buy_protect = 0
+        self.buy_speed = 0
+        self.buy_red = 0
+        self.buy_green = 0
         self.tipe_move = 0
         self.tipe_lvl = 0
+        self.money = 0
         self.form.hide()
         self.close.hide()
         self.clear.hide()
+        self.s_protect.hide()
+        self.s_speed.hide()
+        self.s_v_red.hide()
+        self.s_v_green.hide()
+        self.balance.hide()
         self.lvl_tipes = [self.lvl1, self.lvl2, self.lvl3, self.lvl4]
         for el in self.lvl_tipes:
             el.clicked.connect(self.tipes_move)
@@ -35,6 +45,11 @@ class Cubes(QWidget):
         self.games.clicked.connect(self.last_games)
         self.close.clicked.connect(self.last_games)
         self.clear.clicked.connect(self.deleter)
+        self.shop.clicked.connect(self.shopdef)
+        self.s_protect.clicked.connect(self.buy)
+        self.s_speed.clicked.connect(self.buy)
+        self.s_v_red.clicked.connect(self.buy)
+        self.s_v_green.clicked.connect(self.buy)
         # Задаем значения переменным
         self.scorebd = ''
         self.lvlbd = ''
@@ -46,7 +61,69 @@ class Cubes(QWidget):
         # Добавление даных из базы в выводной лист
         for row in game:
             self.form.addItems([row[0], row[1], row[2], ''])
+        text = cur.execute("SELECT * FROM full_score")
+        # Добавление даных из базы в выводной лист
+        for row in text:
+            self.money = int(row[1])
         # Отключение от бызы данных
+        baza.close()
+
+
+    def shopdef(self):
+        self.balance.show()
+        self.slovo.setText(f'Можете купить усиления на 1 раунд :)')
+        baza = sl.connect('l1.db')
+        cur = baza.cursor()
+        text = cur.execute("SELECT * FROM full_score")
+        # Добавление даных из базы в выводной лист
+        for row in text:
+            self.balance.setText(f'Баланс: {row[1]}')
+            self.money = int(row[1])
+        baza.close()
+        self.s_protect.show()
+        self.s_speed.show()
+        self.s_v_red.show()
+        self.s_v_green.show()
+        self.shop.hide()
+        self.play.hide()
+        self.games.hide()
+        self.close.show()
+
+    def buy(self):
+        baza = sl.connect('l1.db')
+        cur = baza.cursor()
+        if self.sender() == self.s_protect and self.money - 1000 >= 0:
+            self.buy_protect += 1
+            self.money -= 1000
+            cur.execute(f'INSERT INTO full_score (name, f_score) values(?, ?)',
+                        (f'none', f'{self.money}'))
+            # Сохранение изменений в базе
+            baza.commit()
+            self.balance.setText(f'Баланс: {self.money}')
+        elif self.sender() == self.s_speed and self.money - 900 >= 0:
+            self.buy_speed += 0.2
+            self.money -= 900
+            cur.execute(f'INSERT INTO full_score (name, f_score) values(?, ?)',
+                        (f'none', f'{self.money}'))
+            # Сохранение изменений в базе
+            baza.commit()
+            self.balance.setText(f'Баланс: {self.money}')
+        elif self.sender() == self.s_v_red and self.buy_red + 20 < 80 and self.money - 900 >= 0:
+            self.buy_red += 20
+            self.money -= 900
+            cur.execute(f'INSERT INTO full_score (name, f_score) values(?, ?)',
+                        (f'none', f'{self.money}'))
+            # Сохранение изменений в базе
+            baza.commit()
+            self.balance.setText(f'Баланс: {self.money}')
+        elif self.sender() == self.s_v_green and self.buy_green + 15 < 35 and self.money - 500 >= 0:
+            self.buy_green += 15
+            self.money -= 500
+            cur.execute(f'INSERT INTO full_score (name, f_score) values(?, ?)',
+                        (f'none', f'{self.money}'))
+            # Сохранение изменений в базе
+            baza.commit()
+            self.balance.setText(f'Баланс: {self.money}')
         baza.close()
 
     # Метод просмотра последних игр
@@ -59,6 +136,7 @@ class Cubes(QWidget):
             self.play.hide()
             self.games.hide()
             self.slovo.hide()
+            self.shop.hide()
         # Иначе (если нажали закрыть)
         else:
             self.form.hide()
@@ -67,11 +145,18 @@ class Cubes(QWidget):
             self.play.show()
             self.games.show()
             self.slovo.show()
+            self.s_protect.hide()
+            self.s_speed.hide()
+            self.s_v_red.hide()
+            self.s_v_green.hide()
+            self.shop.show()
+            self.balance.hide()
     # Метод выбора сложности
     def lvls(self):
         self.slovo.setText('Выберите уровень сложности:')
         self.play.hide()
         self.games.hide()
+        self.shop.hide()
         for el in self.lvl_tipes:
             el.show()
 
@@ -89,6 +174,7 @@ class Cubes(QWidget):
     def addbd(self):
         # Очищение выводного листа
         self.form.clear()
+
         # Подключение бызы данных
         baza = sl.connect('l1.db')
         cur = baza.cursor()
@@ -96,6 +182,8 @@ class Cubes(QWidget):
         cur.execute(f'INSERT INTO games (scorebd, lvlbd, col_bonusbd, tipe_lvlbd) values(?, ?, ?, ?)',
                     (f'Счет: {int(self.score)}', f'Последняя волна: {self.lvl}',
                      f'Количество собраных бонусов: {self.col_bonus}', f'Сложность: {self.tipe_lvl[13:]}'))
+        cur.execute(f'INSERT INTO full_score (name, f_score) values(?, ?)',
+                    (f'none', f'{self.money + round(int(self.score) / 50 * int(self.tipe_lvl[:2]))}'))
         # Сохранение изменений в базе
         baza.commit()
         # Условие
@@ -210,6 +298,7 @@ class Cubes(QWidget):
             self.slovo.setText('И снова привет! ;)')
             self.play.show()
             self.games.show()
+            self.shop.show()
             # Вызов метода записи данных в базу данных
             if self.restart != -2:
                 self.addbd()
@@ -217,6 +306,10 @@ class Cubes(QWidget):
     # Метод движения игрока
     def move(self):
         # Тип управления буквами
+        if pygame.key.get_pressed()[pygame.K_1]:
+            if self.buy_protect != 0 and self.protect == 0:
+                self.protect = 1
+                self.buy_protect -= 1
         if self.tipe_move == 1:
             if pygame.key.get_pressed()[pygame.K_w]:
                 # Если мы идем по диагонали скорость будет неполной так как она еще будет дополняться -
@@ -498,13 +591,16 @@ class Cubes(QWidget):
         self.col_bonus = 0
         self.last_bonus = 'не собран'
         self.bonus = 0
-        self.speed = 1.5
-        self.v_red = 80
-        self.v_green = 35
+        self.speed = 1.5 + self.buy_speed
+        self.v_red = 80 - self.buy_red
+        self.v_green = 35 - self.buy_green
         self.hard = 0
         self.FPS = 60
         self.clock = pygame.time.Clock()
         self.restart = 1
+        self.buy_speed = 0
+        self.buy_red = 0
+        self.buy_green = 0
 
 # Понятный вывод ошибок
 def except_hook(cls, exception, traceback):
